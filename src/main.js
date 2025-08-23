@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import { major } from 'semver';
 
+const KONAN_URL = 'https://github.com/JetBrains/kotlin/releases/download';
 const DEPENDENCIES_URL = 'https://download-cdn.jetbrains.com/kotlin/native';
 const KOTLIN_VERSION = core.getInput('kotlin_version', {required: true});
 
@@ -68,9 +69,7 @@ async function download(version, os, arch) {
   const [ext, type] = os !== 'Windows' ? ['tar.gz', 'Tar'] : ['zip', 'Zip']
   const prebuilt_arch = {'X64': 'x86_64', 'ARM64': 'aarch64'}[arch];
   const konan_dir = await tc.downloadTool(
-    `${DEPENDENCIES_URL}/builds/releases/` +
-      `${version}/${os.toLowerCase()}-${prebuilt_arch}/` +
-      `kotlin-native-prebuilt-${os.toLowerCase()}-${prebuilt_arch}-${version}.${ext}`
+    `${KONAN_URL}/v${version}/kotlin-native-prebuilt-${os.toLowerCase()}-${prebuilt_arch}-${version}.${ext}`
   ).then(archive => tc[`extract${type}`](archive));
   const deps_dir = join(konan_dir, 'dependencies');
   for (const tool of tools) {
