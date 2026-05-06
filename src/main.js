@@ -44,7 +44,6 @@ const TOOLCHAIN_DOWNLOADS = {
     'resources/llvm/16.0.0-x86_64-windows/llvm-16.0.0-x86_64-windows-essentials-56',
     'msys2-mingw-w64-x86_64-2',
     'libffi-3.3-windows-x64-1',
-    'lldb-4-windows',
   ],
   'K2_macOS_X64': [
     'resources/llvm/16.0.0-x86_64-macos/llvm-16.0.0-x86_64-macos-essentials-50',
