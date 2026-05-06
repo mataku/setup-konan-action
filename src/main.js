@@ -1,7 +1,12 @@
 import { join } from 'node:path';
+import { promises as fsp } from 'node:fs';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import { major } from 'semver';
+
+const exec = promisify(execFile);
 
 const KONAN_URL = 'https://github.com/JetBrains/kotlin/releases/download';
 const DEPENDENCIES_URL = 'https://download-cdn.jetbrains.com/kotlin/native';
@@ -75,7 +80,12 @@ async function download(version, os, arch) {
     await tc.downloadTool(`${DEPENDENCIES_URL}/${tool}.${ext}`)
       .then(archive => tc[`extract${type}`](archive, deps_dir));
   }
-  return tc.cacheDir(konan_dir, 'konan', version);
+  // tc.cacheDir's fs.cp rewrites relative symlinks in the cross toolchains to absolute paths pointing at the temp source, which dangle after cleanup.
+  // Re-copy with cp -a to preserve symlinks verbatim.
+  const cached = await tc.cacheDir(konan_dir, 'konan', version);
+  await fsp.rm(cached, { recursive: true, force: true });
+  await exec('cp', ['-a', `${konan_dir}/.`, cached]);
+  return cached;
 }
 
 export async function run() {
